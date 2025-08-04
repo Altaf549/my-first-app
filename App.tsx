@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, StatusBar, FlatList, Image, ActivityIndicator } from 'react-native';
+import axios from 'axios';
 
 interface Country {
   name: {
@@ -22,12 +23,15 @@ function App() {
   useEffect(() => {
     const fetchCountries = async () => {
       try {
-        const response = await fetch('https://restcountries.com/v3.1/all?fields=name,capital,flags');
-        if (!response.ok) {
-          throw new Error('Failed to fetch countries');
-        }
-        const data = await response.json();
-        setCountries(data);
+        const response = await axios.get('https://restcountries.com/v3.1/all', {
+          params: {
+            fields: 'name,capital,flags'
+          }
+        });
+        const sortedCountries = [...response.data].sort((a, b) => 
+          a.name.common.localeCompare(b.name.common)
+        );
+        setCountries(sortedCountries);
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
         setError(errorMessage);
